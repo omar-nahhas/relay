@@ -52,10 +52,6 @@ var (
 	configName         string
 )
 
-const (
-	paralusSystemNamespace = "paralus-system"
-)
-
 func processRelayConfigData(cfgData string) error {
 	if err := json.Unmarshal([]byte(cfgData), &utils.RelayNetworks); err != nil {
 		log.Error(
@@ -71,7 +67,7 @@ func getConfigMap(ctx context.Context, c client.Client, name string) (*corev1.Co
 	cm := corev1.ConfigMap{}
 
 	err := c.Get(ctx, client.ObjectKey{
-		Namespace: paralusSystemNamespace,
+		Namespace: viper.GetString(podNamespaceEnv),
 		Name:      name,
 	}, &cm)
 	if err != nil {
@@ -161,7 +157,7 @@ func getRelayAgentConfig(ctx context.Context) error {
 }
 
 func setAgentFingerprint(ctx context.Context) error {
-	ns, err := getNamespace(ctx, applier, paralusSystemNamespace)
+	ns, err := getNamespace(ctx, applier, viper.GetString(podNamespaceEnv))
 	if err != nil {
 		return err
 	}
@@ -170,7 +166,7 @@ func setAgentFingerprint(ctx context.Context) error {
 
 	log.Info(
 		"relay agent",
-		"namespace", paralusSystemNamespace,
+		"namespace", viper.GetString(podNamespaceEnv),
 		"fingerprint", fingerprint,
 	)
 
